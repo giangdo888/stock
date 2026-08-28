@@ -68,8 +68,24 @@ public class Product {
         return warehouse;
     }
 
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
     public void setQuantityOnHand(int quantityOnHand) {
         this.quantityOnHand = quantityOnHand;
+    }
+
+    public void setWarehouse(Warehouse warehouse) {
+        this.warehouse = warehouse;
     }
 
     public void reduceQuantity(int quantity) {

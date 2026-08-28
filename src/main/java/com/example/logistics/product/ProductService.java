@@ -39,4 +39,37 @@ public class ProductService {
         Product product = new Product(sku, name, price, quantityOnHand, warehouse);
         return productRepository.save(product);
     }
+
+    @Transactional(readOnly = true)
+    public Product findById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+    }
+
+    @Transactional
+    public Product update(
+            Long id,
+            String sku,
+            String name,
+            java.math.BigDecimal price,
+            int quantityOnHand,
+            Long warehouseId) {
+        Product product = findById(id);
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new IllegalArgumentException("Warehouse not found: " + warehouseId));
+        
+        product.setSku(sku);
+        product.setName(name);
+        product.setPrice(price);
+        product.setQuantityOnHand(quantityOnHand);
+        product.setWarehouse(warehouse);
+        
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Product product = findById(id);
+        productRepository.delete(product);
+    }
 }
