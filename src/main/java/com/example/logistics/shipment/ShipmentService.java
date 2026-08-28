@@ -41,4 +41,17 @@ public class ShipmentService {
 
         return shipmentRepository.save(shipment);
     }
+
+    @Transactional(readOnly = true)
+    public Shipment findById(Long id) {
+        return shipmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found: " + id));
+    }
+
+    @Transactional
+    public Shipment updateStatus(Long id, ShipmentStatus newStatus) {
+        Shipment shipment = findById(id);
+        shipment.transitionTo(newStatus);
+        return shipmentRepository.save(shipment);
+    }
 }

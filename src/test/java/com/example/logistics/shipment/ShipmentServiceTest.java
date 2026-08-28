@@ -60,6 +60,82 @@ class ShipmentServiceTest {
                 .hasMessage("Insufficient stock");
     }
 
+    @Test
+    void findByIdReturnsShipmentWhenExists() {
+        Shipment shipment = new Shipment("Toronto Store");
+        when(shipmentRepository.findById(1L)).thenReturn(Optional.of(shipment));
+
+        Shipment result = shipmentService.findById(1L);
+
+        assertThat(result.getDestination()).isEqualTo("Toronto Store");
+        assertThat(result.getStatus()).isEqualTo(ShipmentStatus.CREATED);
+    }
+
+    @Test
+    void findByIdThrowsWhenShipmentNotFound() {
+        when(shipmentRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> shipmentService.findById(99L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Shipment not found: 99");
+    }
+
+    @Test
+    void updateStatusTransitionsFromCreatedToDispatched() {
+        Shipment shipment = new Shipment("Toronto Store");
+        when(shipmentRepository.findById(1L)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.save(any(Shipment.class))).thenReturn(shipment);
+
+        Shipment result = shipmentService.updateStatus(1L, ShipmentStatus.DISPATCHED);
+
+        assertThat(result.getStatus()).isEqualTo(ShipmentStatus.DISPATCHED);
+        verify(shipmentRepository).save(any(Shipment.class));
+    }
+
+    @Test
+    void updateStatusTransitionsFromCreatedToCancelled() {
+        Shipment shipment = new Shipment("Toronto Store");
+        when(shipmentRepository.findById(1L)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.save(any(Shipment.class))).thenReturn(shipment);
+
+        Shipment result = shipmentService.updateStatus(1L, ShipmentStatus.CANCELLED);
+
+        assertThat(result.getStatus()).isEqualTo(ShipmentStatus.CANCELLED);
+    }
+
+    @Test
+    void updateStatusTransitionsFromDispatchedToDelivered() {
+        Shipment shipment = new Shipment("Toronto Store");
+        shipment.transitionTo(ShipmentStatus.DISPATCHED); // Move to DISPATCHED first
+        when(shipmentRepository.findById(1L)).thenReturn(Optional.of(shipment));
+        when(shipmentRepository.save(any(Shipment.class))).thenReturn(shipment);
+
+        Shipment result = shipmentService.updateStatus(1L, ShipmentStatus.DELIVERED);
+
+        assertThat(result.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
+    }
+
+    @Test
+    void updateStatusRejectsInvalidTransition() {
+        Shipment shipment = new Shipment("Toronto Store");
+        when(shipmentRepository.findById(1L)).thenReturn(Optional.of(shipment));
+
+        assertThatThrownBy(() -> shipmentService.updateStatus(1L, ShipmentStatus.DELIVERED))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cannot transition from CREATED to DELIVERED");
+    }
+
+    @Test
+    void updateStatusRejectsTransitionFromCancelled() {
+        Shipment shipment = new Shipment("Toronto Store");
+        shipment.transitionTo(ShipmentStatus.CANCELLED);
+        when(shipmentRepository.findById(1L)).thenReturn(Optional.of(shipment));
+
+        assertThatThrownBy(() -> shipmentService.updateStatus(1L, ShipmentStatus.DELIVERED))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cannot transition from CANCELLED status");
+    }
+
     private Product productWithStock(int quantity) {
         Warehouse warehouse = new Warehouse("Main Warehouse", "Toronto");
         return new Product(

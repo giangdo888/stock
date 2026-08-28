@@ -58,4 +58,30 @@ public class Shipment {
     public List<ShipmentItem> getItems() {
         return items;
     }
+
+    public void transitionTo(ShipmentStatus newStatus) {
+        validateTransition(newStatus);
+        this.status = newStatus;
+    }
+
+    private void validateTransition(ShipmentStatus newStatus) {
+        switch (this.status) {
+            case CREATED:
+                if (newStatus != ShipmentStatus.DISPATCHED && newStatus != ShipmentStatus.CANCELLED) {
+                    throw new IllegalArgumentException(
+                            "Cannot transition from CREATED to " + newStatus);
+                }
+                break;
+            case DISPATCHED:
+                if (newStatus != ShipmentStatus.DELIVERED) {
+                    throw new IllegalArgumentException(
+                            "Cannot transition from DISPATCHED to " + newStatus);
+                }
+                break;
+            case DELIVERED:
+            case CANCELLED:
+                throw new IllegalArgumentException(
+                        "Cannot transition from " + this.status + " status");
+        }
+    }
 }
