@@ -64,19 +64,29 @@ Optional direct check:
 psql -h localhost -p 15432 -U postgres -d logistics
 ```
 
-### 4. Run the application
+### 4. Load seed data
+
+The project includes a reusable SQL seed file so the local database starts with realistic warehouses, products, and shipment records.
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-The application will start using the datasource configured in:
+The application will automatically run the seed script on startup, using the datasource configured in:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:15432/logistics
 ```
 
-### 5. Test the API
+The same SQL script can be executed against a cloud PostgreSQL instance later when the app is deployed.
+
+### 5. Run the application
+
+```bash
+./mvnw spring-boot:run
+```
+
+### 6. Test the API
 
 The app exposes REST endpoints for:
 
