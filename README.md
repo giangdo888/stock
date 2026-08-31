@@ -64,21 +64,29 @@ Optional direct check:
 psql -h localhost -p 15432 -U postgres -d logistics
 ```
 
-### 4. Load seed data
+### 4. Run database migrations
 
-The project includes a reusable SQL seed file so the local database starts with realistic warehouses, products, and shipment records.
+The project uses Flyway to manage the database schema and seed data in a versioned, repeatable way.
 
-```bash
-./mvnw spring-boot:run
+Migration files live in:
+
+```text
+src/main/resources/db/migration/
 ```
 
-The application will automatically run the seed script on startup, using the datasource configured in:
+Run them locally with:
+
+```bash
+./mvnw flyway:migrate
+```
+
+The application will also apply the same migration history automatically when it starts, using the datasource configured in:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:15432/logistics
 ```
 
-The same SQL script can be executed against a cloud PostgreSQL instance later when the app is deployed.
+This keeps local and cloud PostgreSQL environments aligned in a controlled way.
 
 ### 5. Run the application
 
