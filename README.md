@@ -118,6 +118,8 @@ stock-management/
 │   ├── main/
 │   │   ├── java/
 │   │   └── resources/
+│   │       └── db/
+│   │           └── migration/     # Flyway migration files
 │   └── test/
 ├── docker-compose.yml
 ├── pom.xml
